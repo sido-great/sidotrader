@@ -1,1 +1,611 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Signing in… — SidoTrader</title>
+<style>
+/* ============================================================
+   SidoTrader — Design system
+   Dark trading-app base with a vivid accent per section, set in
+   Space Grotesk (display) / Inter (UI) / JetBrains Mono (data).
+   ============================================================ */
 
+:root {
+  --bg: #0b0e1a;
+  --bg-elevated: #111526;
+  --card: #151a30;
+  --card-border: rgba(255, 255, 255, 0.07);
+  --text: #f3f4f8;
+  --text-dim: #9097b3;
+  --text-faint: #5b6182;
+
+  --violet: #8b5cf6;
+  --violet-2: #ec4899;
+  --cyan: #22d3ee;
+  --cyan-2: #3b82f6;
+  --amber: #fbbf24;
+  --amber-2: #f97316;
+  --rose: #fb7185;
+  --rose-2: #f43f5e;
+  --green: #34d399;
+  --red: #fb7185;
+  --brand-red: #ff444f;
+
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --radius-sm: 10px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-weight: 600;
+  margin: 0;
+}
+
+button, input, select {
+  font-family: inherit;
+}
+
+/* ---------------- App shell: capped to a phone-width column ---------------- */
+
+#app {
+  max-width: 460px;
+  min-height: 100vh;
+  margin: 0 auto;
+  position: relative;
+  background:
+    radial-gradient(circle at 15% -10%, rgba(139, 92, 246, 0.18), transparent 40%),
+    radial-gradient(circle at 100% 0%, rgba(34, 211, 238, 0.12), transparent 45%),
+    var(--bg);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 60px rgba(0,0,0,0.5);
+}
+
+@media (min-width: 461px) {
+  body { display: flex; justify-content: center; padding: 24px 0; }
+  #app { border-radius: 36px; overflow: hidden; min-height: 90vh; border: 1px solid var(--card-border); }
+}
+
+/* ---------------------------- Status bar ---------------------------- */
+
+.statusbar {
+  padding: calc(14px + var(--safe-top)) 18px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand { display: flex; align-items: center; gap: 8px; }
+.brand-mark {
+  width: 28px; height: 28px; border-radius: 9px;
+  background: linear-gradient(135deg, var(--violet), var(--rose-2));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px;
+  box-shadow: 0 4px 14px rgba(139,92,246,0.45);
+}
+.brand-name { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 16px; letter-spacing: -0.2px; }
+
+.status-right { display: flex; align-items: center; gap: 10px; }
+
+.conn-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--text-faint);
+}
+.conn-dot.ok { background: var(--green); box-shadow: 0 0 8px rgba(52,211,153,0.8); }
+.conn-dot.bad { background: var(--rose); box-shadow: 0 0 8px rgba(251,113,133,0.8); }
+
+.account-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--card); border: 1px solid var(--card-border);
+  padding: 5px 10px; border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+}
+.tag {
+  background: rgba(34,211,238,0.15); color: var(--cyan);
+  font-family: 'Inter', sans-serif; font-weight: 600; font-size: 10px;
+  padding: 2px 6px; border-radius: 999px; letter-spacing: 0.4px;
+}
+.tag.real { background: rgba(251,113,133,0.18); color: var(--rose); }
+
+.hidden { display: none !important; }
+
+.btn-pill, .btn-primary, .btn-ghost, .btn-ghost-sm, .btn-danger, .btn-icon, .btn-icon-sm {
+  border: none; cursor: pointer; transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.btn-pill:active, .btn-primary:active, .quick-pill:active, .bot-row button:active { transform: scale(0.96); }
+
+.btn-pill {
+  background: linear-gradient(135deg, var(--violet), var(--cyan-2));
+  color: #fff; font-weight: 600; font-size: 13px;
+  padding: 8px 16px; border-radius: 999px;
+}
+
+/* --------------------------- Pulse strip --------------------------- */
+
+.pulse-strip { height: 34px; margin: 0 18px 4px; opacity: 0.9; }
+#pulse-canvas { width: 100%; height: 100%; display: block; }
+
+/* --------------------------- Disclaimer --------------------------- */
+
+.disclaimer {
+  margin: 0 18px 10px; padding: 12px 14px; border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(244,63,94,0.10));
+  border: 1px solid rgba(251,191,36,0.25);
+  font-size: 12.5px; line-height: 1.5; color: var(--text-dim);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.disclaimer.dismissed { display: none; }
+.disclaimer strong { color: var(--amber); }
+.btn-ghost-sm {
+  align-self: flex-end; background: transparent; color: var(--text);
+  border: 1px solid var(--card-border); padding: 5px 12px; border-radius: 999px; font-size: 12px;
+}
+
+/* ----------------------------- Screens ----------------------------- */
+
+.screens { flex: 1; padding: 4px 18px 110px; overflow-y: auto; }
+.screen { display: none; animation: fadeIn 0.25s ease; }
+.screen.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.screen-title { font-size: 24px; margin: 10px 0 14px; letter-spacing: -0.3px; }
+.screen-title-row { display: flex; align-items: center; justify-content: space-between; margin: 10px 0 6px; }
+.screen-title-row .screen-title { margin: 0; }
+.screen-sub { color: var(--text-dim); font-size: 13px; margin: 0 0 16px; line-height: 1.5; }
+.section-title { font-size: 15px; color: var(--text-dim); margin: 22px 0 10px; font-weight: 600; }
+
+.card {
+  background: var(--card); border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg); padding: 18px;
+}
+
+/* ------------------------------- Home ------------------------------- */
+
+.hero-card { background: linear-gradient(160deg, #1b1340, #150f2e 60%, var(--card)); }
+.hero-row { display: flex; align-items: flex-start; justify-content: space-between; }
+.hero-label { color: var(--text-dim); font-size: 12.5px; margin: 0 0 4px; }
+.hero-value { font-family: 'JetBrains Mono', monospace; font-size: 30px; font-weight: 600; margin: 0; }
+.hero-currency { font-size: 14px; color: var(--text-dim); }
+.hero-status { font-size: 11.5px; color: var(--text-faint); padding-top: 4px; text-align: right; max-width: 110px; }
+.hero-actions { margin-top: 16px; display: flex; gap: 10px; }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--violet), var(--rose-2));
+  color: #fff; font-weight: 600; font-size: 14px;
+  padding: 12px 18px; border-radius: var(--radius-sm);
+  box-shadow: 0 8px 20px rgba(139,92,246,0.3);
+}
+.btn-primary.full { width: 100%; }
+.btn-ghost {
+  background: rgba(255,255,255,0.05); color: var(--text);
+  border: 1px solid var(--card-border); font-weight: 600; font-size: 14px;
+  padding: 12px 18px; border-radius: var(--radius-sm);
+}
+.btn-ghost.full { width: 100%; }
+.btn-danger {
+  background: linear-gradient(135deg, var(--rose-2), #be123c);
+  color: #fff; font-weight: 600; font-size: 14px;
+  padding: 12px 18px; border-radius: var(--radius-sm);
+}
+.btn-danger.full { width: 100%; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+.stat-card { padding: 14px 16px; }
+.stat-label { color: var(--text-dim); font-size: 11.5px; margin: 0 0 6px; }
+.stat-value { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600; margin: 0; }
+
+.quickstart-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.quick-pill {
+  flex: 1 1 calc(50% - 6px); padding: 14px; border-radius: var(--radius-md);
+  border: 1px solid var(--card-border); color: #fff; font-weight: 600; font-size: 13.5px; text-align: left;
+}
+.quick-pill.violet { background: linear-gradient(135deg, rgba(139,92,246,0.35), rgba(139,92,246,0.08)); }
+.quick-pill.cyan { background: linear-gradient(135deg, rgba(34,211,238,0.30), rgba(34,211,238,0.06)); }
+.quick-pill.amber { background: linear-gradient(135deg, rgba(251,191,36,0.30), rgba(251,191,36,0.06)); }
+.quick-pill.rose { background: linear-gradient(135deg, rgba(251,113,133,0.30), rgba(251,113,133,0.06)); }
+
+/* ------------------------------- Bots tab ------------------------------- */
+
+.tabbar-mini { display: flex; gap: 8px; margin-bottom: 14px; }
+.mini-tab {
+  background: transparent; border: 1px solid var(--card-border); color: var(--text-dim);
+  padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 600;
+}
+.mini-tab.active { background: var(--card); color: var(--text); border-color: var(--violet); }
+
+.bot-list { display: flex; flex-direction: column; gap: 10px; }
+.bot-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--card); border: 1px solid var(--card-border); border-left: 3px solid var(--violet);
+  border-radius: var(--radius-md); padding: 14px 16px;
+}
+.bot-row.accent-violet { border-left-color: var(--violet); }
+.bot-row.accent-cyan { border-left-color: var(--cyan); }
+.bot-row.accent-amber { border-left-color: var(--amber); }
+.bot-row.accent-rose { border-left-color: var(--rose); }
+.bot-name { margin: 0; font-weight: 600; font-size: 14.5px; }
+.bot-tagline { margin: 3px 0 0; font-size: 12px; color: var(--text-dim); }
+.bot-row-actions { display: flex; align-items: center; gap: 6px; }
+.btn-icon-sm {
+  background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); color: var(--text-dim);
+  width: 28px; height: 28px; border-radius: 8px; font-size: 13px;
+}
+.empty-note { color: var(--text-faint); font-size: 13px; text-align: center; padding: 30px 10px; }
+
+.upload-box {
+  margin-top: 16px; border: 1.5px dashed var(--card-border); border-radius: var(--radius-md);
+  padding: 18px; text-align: center;
+}
+.upload-label { display: block; cursor: pointer; font-weight: 600; color: var(--cyan); font-size: 14px; }
+.upload-hint { color: var(--text-faint); font-size: 11.5px; margin: 6px 0 0; }
+
+/* ------------------------------- Forms ------------------------------- */
+
+.form-card { display: flex; flex-direction: column; gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--text-dim); }
+.field.half { flex: 1; }
+.field-row { display: flex; gap: 12px; }
+.entry-params { display: flex; gap: 12px; }
+
+input, select {
+  background: var(--bg-elevated); border: 1px solid var(--card-border); color: var(--text);
+  padding: 11px 12px; border-radius: var(--radius-sm); font-size: 14px; outline: none;
+}
+input:focus, select:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(139,92,246,0.18); }
+.select-compact { padding: 7px 10px; font-size: 12.5px; max-width: 160px; }
+
+/* ------------------------------- Signals ------------------------------- */
+
+.btn-icon {
+  background: var(--card); border: 1px solid var(--card-border); color: var(--amber);
+  width: 36px; height: 36px; border-radius: 50%; font-size: 17px;
+}
+.signal-card { min-height: 140px; }
+.signal-placeholder { color: var(--text-faint); font-size: 13px; text-align: center; padding: 30px 0; margin: 0; }
+.signal-top { display: flex; align-items: center; justify-content: space-between; }
+.signal-dir { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; }
+.signal-dir.up { color: var(--green); }
+.signal-dir.down { color: var(--rose); }
+.signal-dir.flat { color: var(--amber); }
+.signal-confidence { font-size: 12.5px; color: var(--text-dim); }
+.signal-last { font-size: 13px; color: var(--text-dim); margin: 10px 0; }
+.signal-meta { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 10px 0; }
+.signal-meta div { background: var(--bg-elevated); border-radius: var(--radius-sm); padding: 8px; text-align: center; }
+.signal-meta small { display: block; color: var(--text-faint); font-size: 10px; margin-bottom: 3px; }
+.signal-meta strong { font-family: 'JetBrains Mono', monospace; font-size: 14px; }
+.signal-note { color: var(--amber); font-size: 12px; margin: 6px 0; }
+.signal-disclaimer { color: var(--text-faint); font-size: 11px; margin: 10px 0 0; line-height: 1.5; }
+
+/* -------------------------------- Chart -------------------------------- */
+
+.chart-wrap { padding: 16px; }
+.chart-readout { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+.chart-price { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 600; }
+.chart-price.up { color: var(--green); }
+.chart-price.down { color: var(--rose); }
+.chart-readout-label { color: var(--text-faint); font-size: 11.5px; }
+.chart-canvas-holder { height: 260px; position: relative; }
+#tick-chart { width: 100%; height: 100%; display: block; }
+
+/* ----------------------------- Bottom nav ----------------------------- */
+
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 460px;
+  display: flex; justify-content: space-around;
+  background: rgba(17,21,38,0.92); backdrop-filter: blur(14px);
+  border-top: 1px solid var(--card-border);
+  padding: 8px 6px calc(8px + var(--safe-bottom));
+  z-index: 20;
+}
+.nav-btn {
+  background: none; border: none; color: var(--text-faint);
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font-size: 10.5px; font-weight: 600; padding: 4px 10px; border-radius: 12px;
+}
+.nav-ico { font-size: 18px; }
+.nav-btn.active { color: var(--text); background: rgba(139,92,246,0.15); }
+
+/* ------------------------------ Run sheet ------------------------------ */
+
+.sheet-overlay {
+  position: fixed; inset: 0; background: rgba(5,6,12,0.7);
+  display: flex; align-items: flex-end; justify-content: center; z-index: 50;
+}
+.sheet {
+  width: 100%; max-width: 460px; background: var(--bg-elevated);
+  border-radius: 24px 24px 0 0; padding: 10px 20px calc(20px + var(--safe-bottom));
+  max-height: 88vh; overflow-y: auto;
+  border-top: 1px solid var(--card-border);
+}
+.sheet-handle { width: 40px; height: 4px; background: var(--card-border); border-radius: 999px; margin: 6px auto 14px; }
+.run-sheet-tagline { color: var(--text-dim); font-size: 13px; margin: 2px 0 16px; }
+.run-stats { display: flex; justify-content: space-between; background: var(--card); border-radius: var(--radius-md); padding: 14px; margin: 16px 0; }
+.run-stats div { text-align: center; flex: 1; }
+.run-stats span { display: block; font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 600; }
+.run-stats small { color: var(--text-faint); font-size: 10.5px; }
+.run-log {
+  max-height: 130px; overflow-y: auto; font-size: 11.5px; color: var(--text-dim);
+  background: var(--card); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 14px;
+}
+.run-log p { margin: 0 0 6px; }
+.run-actions { display: flex; flex-direction: column; gap: 10px; }
+
+/* -------------------------------- Toast -------------------------------- */
+
+.toast {
+  position: fixed; bottom: calc(90px + var(--safe-bottom)); left: 50%; transform: translateX(-50%);
+  background: #fff; color: #14152b; padding: 10px 18px; border-radius: 999px;
+  font-size: 13px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  z-index: 60; max-width: 86%; text-align: center;
+}
+
+/* ------------------------------ Callback page ------------------------------ */
+
+.callback-body {
+  display: flex; align-items: center; justify-content: center; min-height: 100vh;
+  background: radial-gradient(circle at 50% 0%, rgba(139,92,246,0.18), var(--bg) 60%);
+}
+.callback-card { text-align: center; max-width: 320px; padding: 30px; }
+.callback-card h1 { font-size: 20px; margin-bottom: 8px; }
+.callback-card p { color: var(--text-dim); font-size: 13.5px; line-height: 1.5; }
+.spinner {
+  width: 38px; height: 38px; margin: 0 auto 18px;
+  border: 3px solid var(--card-border); border-top-color: var(--violet);
+  border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+</style>
+</head>
+<body class="callback-body">
+
+<div class="callback-card">
+  <div class="spinner" id="spinner"></div>
+  <h1 id="callback-title">Completing sign-in…</h1>
+  <p id="callback-text">Hang tight while we finish connecting your Deriv account.</p>
+  <a href="index.html" id="callback-return" class="btn-primary hidden">Return to SidoTrader</a>
+</div>
+
+<script>
+/* ============================================================
+   SidoTrader — Auth module
+   OAuth 2.0 Authorization Code + PKCE against Deriv's new
+   developers.deriv.com auth server.
+   ============================================================ */
+
+const SIDO_CONFIG = {
+  // Your registered OAuth application (App ID / client_id)
+  APP_ID: '33CP1JvyUxBxMJSzanfbT',
+
+  // Must exactly match a redirect URL registered on developers.deriv.com
+  REDIRECT_URI: 'https://sido-great.github.io/sidotrader/callback.html',
+
+  // New OAuth2 endpoints (developers.deriv.com)
+  AUTH_ENDPOINT: 'https://auth.deriv.com/oauth2/auth',
+  TOKEN_ENDPOINT: 'https://auth.deriv.com/oauth2/token',
+
+  // REST API base + trading WebSocket
+  API_BASE: 'https://api.derivws.com',
+  PUBLIC_WS: 'wss://ws.binaryws.com/websockets/v3',
+
+  /*
+   * Scopes — these checkbox labels came straight off your
+   * developers.deriv.com screenshot. The dashboard only shows
+   * human-readable labels, not the raw OAuth scope slugs, so
+   * "app_insights" below is our best-guess slug for
+   * "Application insights". Open your browser's dev tools while
+   * ticking the boxes on the registration page (or check the
+   * generated authorize URL) to confirm the exact slug Deriv
+   * expects, and update SCOPES if it differs.
+   */
+  SCOPES: ['trade', 'account_manage', 'payments'], // 'app_insights' removed — Deriv's auth server rejected it as an unknown scope. See README for how to find the real slug for "Application insights" if you need that one.
+
+  STORAGE_PREFIX: 'sido_'
+};
+
+const SidoAuth = (() => {
+  function randomString(len) {
+    const charset =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+    const arr = crypto.getRandomValues(new Uint8Array(len));
+    return Array.from(arr, (v) => charset[v % charset.length]).join('');
+  }
+
+  function base64url(buffer) {
+    return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+  }
+
+  async function sha256(text) {
+    const data = new TextEncoder().encode(text);
+    return crypto.subtle.digest('SHA-256', data);
+  }
+
+  function safeSet(key, val) {
+    try {
+      sessionStorage.setItem(SIDO_CONFIG.STORAGE_PREFIX + key, val);
+    } catch (e) {
+      /* sessionStorage unavailable (e.g. sandboxed preview) — ignore */
+    }
+  }
+  function safeGet(key) {
+    try {
+      return sessionStorage.getItem(SIDO_CONFIG.STORAGE_PREFIX + key);
+    } catch (e) {
+      return null;
+    }
+  }
+  function safeRemove(key) {
+    try {
+      sessionStorage.removeItem(SIDO_CONFIG.STORAGE_PREFIX + key);
+    } catch (e) {}
+  }
+
+  // Persisted (longer-lived) token storage — localStorage so a refresh
+  // doesn't log the user out. Falls back to an in-memory object if
+  // localStorage is blocked by the hosting environment.
+  const memoryFallback = {};
+  function persistSet(key, val) {
+    try {
+      localStorage.setItem(SIDO_CONFIG.STORAGE_PREFIX + key, val);
+    } catch (e) {
+      memoryFallback[key] = val;
+    }
+  }
+  function persistGet(key) {
+    try {
+      const v = localStorage.getItem(SIDO_CONFIG.STORAGE_PREFIX + key);
+      if (v !== null) return v;
+    } catch (e) {}
+    return memoryFallback[key] ?? null;
+  }
+  function persistRemove(key) {
+    try {
+      localStorage.removeItem(SIDO_CONFIG.STORAGE_PREFIX + key);
+    } catch (e) {}
+    delete memoryFallback[key];
+  }
+
+  /** Kick off the login redirect with a fresh PKCE pair + state. */
+  async function login() {
+    const verifier = randomString(64);
+    const challenge = base64url(await sha256(verifier));
+    const state = randomString(24);
+
+    safeSet('pkce_verifier', verifier);
+    safeSet('oauth_state', state);
+
+    const url = new URL(SIDO_CONFIG.AUTH_ENDPOINT);
+    url.searchParams.set('response_type', 'code');
+    url.searchParams.set('client_id', SIDO_CONFIG.APP_ID);
+    url.searchParams.set('redirect_uri', SIDO_CONFIG.REDIRECT_URI);
+    url.searchParams.set('scope', SIDO_CONFIG.SCOPES.join(' '));
+    url.searchParams.set('state', state);
+    url.searchParams.set('code_challenge', challenge);
+    url.searchParams.set('code_challenge_method', 'S256');
+
+    window.location.href = url.toString();
+  }
+
+  /**
+   * Called from callback.html once Deriv redirects back with
+   * ?code=...&state=.... Verifies state, exchanges the code for a
+   * token, and stores the result.
+   *
+   * NOTE: Deriv's docs recommend doing this exchange from a backend.
+   * SidoTrader is a static, no-backend site, so this happens directly
+   * from the browser. That's the standard pattern for public SPA
+   * clients using PKCE, but if you later add a server, move this
+   * fetch() there for an extra layer of safety.
+   */
+  async function handleCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    if (error) {
+      throw new Error(params.get('error_description') || error);
+    }
+
+    const code = params.get('code');
+    const returnedState = params.get('state');
+    const savedState = safeGet('oauth_state');
+    const verifier = safeGet('pkce_verifier');
+
+    if (!code) throw new Error('No authorization code returned.');
+    if (!returnedState || returnedState !== savedState) {
+      throw new Error('State mismatch — possible CSRF. Please log in again.');
+    }
+    if (!verifier) throw new Error('Missing PKCE verifier — session expired.');
+
+    const res = await fetch(SIDO_CONFIG.TOKEN_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        client_id: SIDO_CONFIG.APP_ID,
+        code,
+        redirect_uri: SIDO_CONFIG.REDIRECT_URI,
+        code_verifier: verifier
+      })
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error('Token exchange failed: ' + res.status + ' ' + text);
+    }
+
+    const data = await res.json();
+    safeRemove('pkce_verifier');
+    safeRemove('oauth_state');
+
+    persistSet('access_token', data.access_token);
+    persistSet('expires_at', String(Date.now() + (data.expires_in || 3600) * 1000));
+    if (data.refresh_token) persistSet('refresh_token', data.refresh_token);
+
+    return data;
+  }
+
+  function getToken() {
+    const token = persistGet('access_token');
+    const expiresAt = Number(persistGet('expires_at') || 0);
+    if (!token || Date.now() > expiresAt) return null;
+    return token;
+  }
+
+  function isLoggedIn() {
+    return !!getToken();
+  }
+
+  function logout() {
+    persistRemove('access_token');
+    persistRemove('expires_at');
+    persistRemove('refresh_token');
+  }
+
+  return { login, handleCallback, getToken, isLoggedIn, logout };
+})();
+
+</script>
+<script>
+  (async function () {
+    const titleEl = document.getElementById('callback-title');
+    const textEl = document.getElementById('callback-text');
+    const returnEl = document.getElementById('callback-return');
+    const spinnerEl = document.getElementById('spinner');
+
+    try {
+      await SidoAuth.handleCallback();
+      titleEl.textContent = 'You\'re in!';
+      textEl.textContent = 'Redirecting back to SidoTrader…';
+      spinnerEl.classList.add('hidden');
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 700);
+    } catch (err) {
+      spinnerEl.classList.add('hidden');
+      titleEl.textContent = 'Sign-in didn\'t complete';
+      textEl.textContent = err?.message || 'Something went wrong during sign-in.';
+      returnEl.classList.remove('hidden');
+      returnEl.textContent = 'Back to SidoTrader';
+    }
+  })();
+</script>
+</body>
+</html>
