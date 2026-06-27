@@ -1,0 +1,2184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>SidoTrader — Deriv Bots</title>
+<meta name="theme-color" content="#0b0e1a" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230b0e1a'/><text x='50' y='66' font-size='58' text-anchor='middle' fill='%238b5cf6'>S</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   SidoTrader — Design system
+   Dark trading-app base with a vivid accent per section, set in
+   Space Grotesk (display) / Inter (UI) / JetBrains Mono (data).
+   ============================================================ */
+
+:root {
+  --bg: #0b0e1a;
+  --bg-elevated: #111526;
+  --card: #151a30;
+  --card-border: rgba(255, 255, 255, 0.07);
+  --text: #f3f4f8;
+  --text-dim: #9097b3;
+  --text-faint: #5b6182;
+
+  --violet: #8b5cf6;
+  --violet-2: #ec4899;
+  --cyan: #22d3ee;
+  --cyan-2: #3b82f6;
+  --amber: #fbbf24;
+  --amber-2: #f97316;
+  --rose: #fb7185;
+  --rose-2: #f43f5e;
+  --green: #34d399;
+  --red: #fb7185;
+  --brand-red: #ff444f;
+
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --radius-sm: 10px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-weight: 600;
+  margin: 0;
+}
+
+button, input, select {
+  font-family: inherit;
+}
+
+/* ---------------- App shell: capped to a phone-width column ---------------- */
+
+#app {
+  max-width: 460px;
+  min-height: 100vh;
+  margin: 0 auto;
+  position: relative;
+  background:
+    radial-gradient(circle at 15% -10%, rgba(139, 92, 246, 0.18), transparent 40%),
+    radial-gradient(circle at 100% 0%, rgba(34, 211, 238, 0.12), transparent 45%),
+    var(--bg);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 60px rgba(0,0,0,0.5);
+}
+
+@media (min-width: 461px) {
+  body { display: flex; justify-content: center; padding: 24px 0; }
+  #app { border-radius: 36px; overflow: hidden; min-height: 90vh; border: 1px solid var(--card-border); }
+}
+
+/* ---------------------------- Status bar ---------------------------- */
+
+.statusbar {
+  padding: calc(14px + var(--safe-top)) 18px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand { display: flex; align-items: center; gap: 8px; }
+.brand-mark {
+  width: 28px; height: 28px; border-radius: 9px;
+  background: linear-gradient(135deg, var(--violet), var(--rose-2));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px;
+  box-shadow: 0 4px 14px rgba(139,92,246,0.45);
+}
+.brand-name { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 16px; letter-spacing: -0.2px; }
+
+.status-right { display: flex; align-items: center; gap: 10px; }
+
+.conn-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--text-faint);
+}
+.conn-dot.ok { background: var(--green); box-shadow: 0 0 8px rgba(52,211,153,0.8); }
+.conn-dot.bad { background: var(--rose); box-shadow: 0 0 8px rgba(251,113,133,0.8); }
+
+.account-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--card); border: 1px solid var(--card-border);
+  padding: 5px 10px; border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+}
+.tag {
+  background: rgba(34,211,238,0.15); color: var(--cyan);
+  font-family: 'Inter', sans-serif; font-weight: 600; font-size: 10px;
+  padding: 2px 6px; border-radius: 999px; letter-spacing: 0.4px;
+}
+.tag.real { background: rgba(251,113,133,0.18); color: var(--rose); }
+
+.hidden { display: none !important; }
+
+.btn-pill, .btn-primary, .btn-ghost, .btn-ghost-sm, .btn-danger, .btn-icon, .btn-icon-sm {
+  border: none; cursor: pointer; transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.btn-pill:active, .btn-primary:active, .quick-pill:active, .bot-row button:active { transform: scale(0.96); }
+
+.btn-pill {
+  background: linear-gradient(135deg, var(--violet), var(--cyan-2));
+  color: #fff; font-weight: 600; font-size: 13px;
+  padding: 8px 16px; border-radius: 999px;
+}
+
+/* --------------------------- Pulse strip --------------------------- */
+
+.pulse-strip { height: 34px; margin: 0 18px 4px; opacity: 0.9; }
+#pulse-canvas { width: 100%; height: 100%; display: block; }
+
+/* --------------------------- Disclaimer --------------------------- */
+
+.disclaimer {
+  margin: 0 18px 10px; padding: 12px 14px; border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(244,63,94,0.10));
+  border: 1px solid rgba(251,191,36,0.25);
+  font-size: 12.5px; line-height: 1.5; color: var(--text-dim);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.disclaimer.dismissed { display: none; }
+.disclaimer strong { color: var(--amber); }
+.btn-ghost-sm {
+  align-self: flex-end; background: transparent; color: var(--text);
+  border: 1px solid var(--card-border); padding: 5px 12px; border-radius: 999px; font-size: 12px;
+}
+
+/* ----------------------------- Screens ----------------------------- */
+
+.screens { flex: 1; padding: 4px 18px 110px; overflow-y: auto; }
+.screen { display: none; animation: fadeIn 0.25s ease; }
+.screen.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.screen-title { font-size: 24px; margin: 10px 0 14px; letter-spacing: -0.3px; }
+.screen-title-row { display: flex; align-items: center; justify-content: space-between; margin: 10px 0 6px; }
+.screen-title-row .screen-title { margin: 0; }
+.screen-sub { color: var(--text-dim); font-size: 13px; margin: 0 0 16px; line-height: 1.5; }
+.section-title { font-size: 15px; color: var(--text-dim); margin: 22px 0 10px; font-weight: 600; }
+
+.card {
+  background: var(--card); border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg); padding: 18px;
+}
+
+/* ------------------------------- Home ------------------------------- */
+
+.hero-card { background: linear-gradient(160deg, #1b1340, #150f2e 60%, var(--card)); }
+.hero-row { display: flex; align-items: flex-start; justify-content: space-between; }
+.hero-label { color: var(--text-dim); font-size: 12.5px; margin: 0 0 4px; }
+.hero-value { font-family: 'JetBrains Mono', monospace; font-size: 30px; font-weight: 600; margin: 0; }
+.hero-currency { font-size: 14px; color: var(--text-dim); }
+.hero-status { font-size: 11.5px; color: var(--text-faint); padding-top: 4px; text-align: right; max-width: 110px; }
+.hero-actions { margin-top: 16px; display: flex; gap: 10px; }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--violet), var(--rose-2));
+  color: #fff; font-weight: 600; font-size: 14px;
+  padding: 12px 18px; border-radius: var(--radius-sm);
+  box-shadow: 0 8px 20px rgba(139,92,246,0.3);
+}
+.btn-primary.full { width: 100%; }
+.btn-ghost {
+  background: rgba(255,255,255,0.05); color: var(--text);
+  border: 1px solid var(--card-border); font-weight: 600; font-size: 14px;
+  padding: 12px 18px; border-radius: var(--radius-sm);
+}
+.btn-ghost.full { width: 100%; }
+.btn-danger {
+  background: linear-gradient(135deg, var(--rose-2), #be123c);
+  color: #fff; font-weight: 600; font-size: 14px;
+  padding: 12px 18px; border-radius: var(--radius-sm);
+}
+.btn-danger.full { width: 100%; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+.stat-card { padding: 14px 16px; }
+.stat-label { color: var(--text-dim); font-size: 11.5px; margin: 0 0 6px; }
+.stat-value { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600; margin: 0; }
+
+.quickstart-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.quick-pill {
+  flex: 1 1 calc(50% - 6px); padding: 14px; border-radius: var(--radius-md);
+  border: 1px solid var(--card-border); color: #fff; font-weight: 600; font-size: 13.5px; text-align: left;
+}
+.quick-pill.violet { background: linear-gradient(135deg, rgba(139,92,246,0.35), rgba(139,92,246,0.08)); }
+.quick-pill.cyan { background: linear-gradient(135deg, rgba(34,211,238,0.30), rgba(34,211,238,0.06)); }
+.quick-pill.amber { background: linear-gradient(135deg, rgba(251,191,36,0.30), rgba(251,191,36,0.06)); }
+.quick-pill.rose { background: linear-gradient(135deg, rgba(251,113,133,0.30), rgba(251,113,133,0.06)); }
+
+/* ------------------------------- Bots tab ------------------------------- */
+
+.tabbar-mini { display: flex; gap: 8px; margin-bottom: 14px; }
+.mini-tab {
+  background: transparent; border: 1px solid var(--card-border); color: var(--text-dim);
+  padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 600;
+}
+.mini-tab.active { background: var(--card); color: var(--text); border-color: var(--violet); }
+
+.bot-list { display: flex; flex-direction: column; gap: 10px; }
+.bot-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--card); border: 1px solid var(--card-border); border-left: 3px solid var(--violet);
+  border-radius: var(--radius-md); padding: 14px 16px;
+}
+.bot-row.accent-violet { border-left-color: var(--violet); }
+.bot-row.accent-cyan { border-left-color: var(--cyan); }
+.bot-row.accent-amber { border-left-color: var(--amber); }
+.bot-row.accent-rose { border-left-color: var(--rose); }
+.bot-name { margin: 0; font-weight: 600; font-size: 14.5px; }
+.bot-tagline { margin: 3px 0 0; font-size: 12px; color: var(--text-dim); }
+.bot-row-actions { display: flex; align-items: center; gap: 6px; }
+.btn-icon-sm {
+  background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); color: var(--text-dim);
+  width: 28px; height: 28px; border-radius: 8px; font-size: 13px;
+}
+.empty-note { color: var(--text-faint); font-size: 13px; text-align: center; padding: 30px 10px; }
+
+.upload-box {
+  margin-top: 16px; border: 1.5px dashed var(--card-border); border-radius: var(--radius-md);
+  padding: 18px; text-align: center;
+}
+.upload-label { display: block; cursor: pointer; font-weight: 600; color: var(--cyan); font-size: 14px; }
+.upload-hint { color: var(--text-faint); font-size: 11.5px; margin: 6px 0 0; }
+
+/* ------------------------------- Forms ------------------------------- */
+
+.form-card { display: flex; flex-direction: column; gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--text-dim); }
+.field.half { flex: 1; }
+.field-row { display: flex; gap: 12px; }
+.entry-params { display: flex; gap: 12px; }
+
+input, select {
+  background: var(--bg-elevated); border: 1px solid var(--card-border); color: var(--text);
+  padding: 11px 12px; border-radius: var(--radius-sm); font-size: 14px; outline: none;
+}
+input:focus, select:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(139,92,246,0.18); }
+.select-compact { padding: 7px 10px; font-size: 12.5px; max-width: 160px; }
+
+/* ------------------------------- Signals ------------------------------- */
+
+.btn-icon {
+  background: var(--card); border: 1px solid var(--card-border); color: var(--amber);
+  width: 36px; height: 36px; border-radius: 50%; font-size: 17px;
+}
+.signal-card { min-height: 140px; }
+.signal-placeholder { color: var(--text-faint); font-size: 13px; text-align: center; padding: 30px 0; margin: 0; }
+.signal-top { display: flex; align-items: center; justify-content: space-between; }
+.signal-dir { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; }
+.signal-dir.up { color: var(--green); }
+.signal-dir.down { color: var(--rose); }
+.signal-dir.flat { color: var(--amber); }
+.signal-confidence { font-size: 12.5px; color: var(--text-dim); }
+.signal-last { font-size: 13px; color: var(--text-dim); margin: 10px 0; }
+.signal-meta { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 10px 0; }
+.signal-meta div { background: var(--bg-elevated); border-radius: var(--radius-sm); padding: 8px; text-align: center; }
+.signal-meta small { display: block; color: var(--text-faint); font-size: 10px; margin-bottom: 3px; }
+.signal-meta strong { font-family: 'JetBrains Mono', monospace; font-size: 14px; }
+.signal-note { color: var(--amber); font-size: 12px; margin: 6px 0; }
+.signal-disclaimer { color: var(--text-faint); font-size: 11px; margin: 10px 0 0; line-height: 1.5; }
+
+/* -------------------------------- Chart -------------------------------- */
+
+.chart-wrap { padding: 16px; }
+.chart-readout { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+.chart-price { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 600; }
+.chart-price.up { color: var(--green); }
+.chart-price.down { color: var(--rose); }
+.chart-readout-label { color: var(--text-faint); font-size: 11.5px; }
+.chart-canvas-holder { height: 260px; position: relative; }
+#tick-chart { width: 100%; height: 100%; display: block; }
+
+/* ----------------------------- Bottom nav ----------------------------- */
+
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 460px;
+  display: flex; justify-content: space-around;
+  background: rgba(17,21,38,0.92); backdrop-filter: blur(14px);
+  border-top: 1px solid var(--card-border);
+  padding: 8px 6px calc(8px + var(--safe-bottom));
+  z-index: 20;
+}
+.nav-btn {
+  background: none; border: none; color: var(--text-faint);
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font-size: 10.5px; font-weight: 600; padding: 4px 10px; border-radius: 12px;
+}
+.nav-ico { font-size: 18px; }
+.nav-btn.active { color: var(--text); background: rgba(139,92,246,0.15); }
+
+/* ------------------------------ Run sheet ------------------------------ */
+
+.sheet-overlay {
+  position: fixed; inset: 0; background: rgba(5,6,12,0.7);
+  display: flex; align-items: flex-end; justify-content: center; z-index: 50;
+}
+.sheet {
+  width: 100%; max-width: 460px; background: var(--bg-elevated);
+  border-radius: 24px 24px 0 0; padding: 10px 20px calc(20px + var(--safe-bottom));
+  max-height: 88vh; overflow-y: auto;
+  border-top: 1px solid var(--card-border);
+}
+.sheet-handle { width: 40px; height: 4px; background: var(--card-border); border-radius: 999px; margin: 6px auto 14px; }
+.run-sheet-tagline { color: var(--text-dim); font-size: 13px; margin: 2px 0 16px; }
+.run-stats { display: flex; justify-content: space-between; background: var(--card); border-radius: var(--radius-md); padding: 14px; margin: 16px 0; }
+.run-stats div { text-align: center; flex: 1; }
+.run-stats span { display: block; font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 600; }
+.run-stats small { color: var(--text-faint); font-size: 10.5px; }
+.run-log {
+  max-height: 130px; overflow-y: auto; font-size: 11.5px; color: var(--text-dim);
+  background: var(--card); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 14px;
+}
+.run-log p { margin: 0 0 6px; }
+.run-actions { display: flex; flex-direction: column; gap: 10px; }
+
+/* -------------------------------- Toast -------------------------------- */
+
+.toast {
+  position: fixed; bottom: calc(90px + var(--safe-bottom)); left: 50%; transform: translateX(-50%);
+  background: #fff; color: #14152b; padding: 10px 18px; border-radius: 999px;
+  font-size: 13px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  z-index: 60; max-width: 86%; text-align: center;
+}
+
+/* ------------------------------ Callback page ------------------------------ */
+
+.callback-body {
+  display: flex; align-items: center; justify-content: center; min-height: 100vh;
+  background: radial-gradient(circle at 50% 0%, rgba(139,92,246,0.18), var(--bg) 60%);
+}
+.callback-card { text-align: center; max-width: 320px; padding: 30px; }
+.callback-card h1 { font-size: 20px; margin-bottom: 8px; }
+.callback-card p { color: var(--text-dim); font-size: 13.5px; line-height: 1.5; }
+.spinner {
+  width: 38px; height: 38px; margin: 0 auto 18px;
+  border: 3px solid var(--card-border); border-top-color: var(--violet);
+  border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- Status bar -->
+  <header class="statusbar">
+    <div class="brand">
+      <span class="brand-mark">S</span>
+      <span class="brand-name">SidoTrader</span>
+    </div>
+    <div class="status-right">
+      <span id="conn-dot" class="conn-dot" title="Connection status"></span>
+      <div id="account-chip" class="account-chip hidden">
+        <span id="account-balance">—</span>
+        <span id="account-tag" class="tag">DEMO</span>
+      </div>
+      <button id="login-btn" class="btn-pill">Log in</button>
+    </div>
+  </header>
+
+  <!-- Signature pulse strip -->
+  <div class="pulse-strip" id="pulse-strip" aria-hidden="true">
+    <canvas id="pulse-canvas"></canvas>
+  </div>
+
+  <!-- Disclaimer banner -->
+  <div class="disclaimer" id="disclaimer">
+    <p><strong>Heads up:</strong> trading derivatives carries a high level of risk. Bots here trade automatically once started — they can lose money just as fast as they make it. Built-in strategies and AI Signals are simple, transparent rules for demonstration, not financial advice. Start on a demo account first.</p>
+    <button id="disclaimer-close" class="btn-ghost-sm">Got it</button>
+  </div>
+
+  <main class="screens">
+
+    <!-- HOME -->
+    <section class="screen active" id="screen-home">
+      <h1 class="screen-title">Dashboard</h1>
+
+      <div class="card hero-card">
+        <div class="hero-row">
+          <div>
+            <p class="hero-label">Account balance</p>
+            <p class="hero-value" id="hero-balance">— <span class="hero-currency" id="hero-currency"></span></p>
+          </div>
+          <span class="hero-status" id="hero-conn-text">Not connected</span>
+        </div>
+        <div class="hero-actions">
+          <button id="home-login-btn" class="btn-primary">Log in with Deriv</button>
+          <button id="home-logout-btn" class="btn-ghost hidden">Log out</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card stat-card">
+          <p class="stat-label">Active bots</p>
+          <p class="stat-value" id="stat-active-bots">0</p>
+        </div>
+        <div class="card stat-card">
+          <p class="stat-label">Session P/L</p>
+          <p class="stat-value" id="stat-session-pl">0.00</p>
+        </div>
+      </div>
+
+      <h2 class="section-title">Quick start</h2>
+      <div class="quickstart-row">
+        <button class="quick-pill violet" data-goto="screen-bots">🤖 Bots</button>
+        <button class="quick-pill cyan" data-goto="screen-builder">🛠 Builder</button>
+        <button class="quick-pill amber" data-goto="screen-signals">📡 Signals</button>
+        <button class="quick-pill rose" data-goto="screen-chart">📈 Chart</button>
+      </div>
+    </section>
+
+    <!-- BOTS -->
+    <section class="screen" id="screen-bots">
+      <h1 class="screen-title">Bots</h1>
+
+      <div class="tabbar-mini">
+        <button class="mini-tab active" data-bots-view="builtin">Built-in</button>
+        <button class="mini-tab" data-bots-view="mine">My bots</button>
+      </div>
+
+      <div id="builtin-bots-list" class="bot-list"></div>
+
+      <div id="mine-bots-list" class="bot-list hidden"></div>
+
+      <div class="upload-box hidden" id="upload-box-bots">
+        <label class="upload-label" for="upload-bot-input">
+          <span>⬆️ Upload a bot (.json)</span>
+          <input type="file" id="upload-bot-input" accept="application/json" hidden />
+        </label>
+        <p class="upload-hint">Exported from the Builder tab, or hand-written using the same shape.</p>
+      </div>
+    </section>
+
+    <!-- BUILDER -->
+    <section class="screen" id="screen-builder">
+      <h1 class="screen-title">Bot builder</h1>
+      <p class="screen-sub">No blocks to drag — just set the rule and the trade it triggers.</p>
+
+      <form class="card form-card" id="builder-form">
+        <label class="field">
+          <span>Bot name</span>
+          <input type="text" name="name" placeholder="My Volatility bot" required />
+        </label>
+
+        <label class="field">
+          <span>Market</span>
+          <select name="symbol" id="builder-symbol"></select>
+        </label>
+
+        <label class="field">
+          <span>Entry condition</span>
+          <select name="entry" id="builder-entry">
+            <option value="sma_cross">Moving average crossover</option>
+            <option value="digit_parity">Last-digit parity streak</option>
+          </select>
+        </label>
+
+        <div id="builder-entry-sma" class="entry-params">
+          <label class="field half">
+            <span>Fast SMA</span>
+            <input type="number" name="fastPeriod" value="8" min="2" max="50" />
+          </label>
+          <label class="field half">
+            <span>Slow SMA</span>
+            <input type="number" name="slowPeriod" value="24" min="3" max="100" />
+          </label>
+        </div>
+
+        <div id="builder-entry-digit" class="entry-params hidden">
+          <label class="field">
+            <span>Streak length</span>
+            <input type="number" name="streak" value="4" min="2" max="10" />
+          </label>
+        </div>
+
+        <div class="field-row">
+          <label class="field half">
+            <span>On bullish / even signal</span>
+            <select name="contractUp">
+              <option value="CALL">Rise (CALL)</option>
+              <option value="DIGITEVEN">Digit Even</option>
+              <option value="DIGITOVER">Digit Over 4</option>
+            </select>
+          </label>
+          <label class="field half">
+            <span>On bearish / odd signal</span>
+            <select name="contractDown">
+              <option value="PUT">Fall (PUT)</option>
+              <option value="DIGITODD">Digit Odd</option>
+              <option value="DIGITUNDER">Digit Under 5</option>
+            </select>
+          </label>
+        </div>
+
+        <button type="submit" class="btn-primary full">Save bot</button>
+      </form>
+    </section>
+
+    <!-- SIGNALS -->
+    <section class="screen" id="screen-signals">
+      <div class="screen-title-row">
+        <h1 class="screen-title">AI signals</h1>
+        <button id="signals-refresh" class="btn-icon" title="Refresh">↻</button>
+      </div>
+      <p class="screen-sub">A transparent read of recent ticks (moving averages, RSI, digit bias) — for demo &amp; learning, not financial advice.</p>
+
+      <label class="field">
+        <span>Market</span>
+        <select id="signals-symbol"></select>
+      </label>
+
+      <div class="card signal-card" id="signal-card">
+        <p class="signal-placeholder">Tap refresh to analyse the latest ticks.</p>
+      </div>
+    </section>
+
+    <!-- CHART -->
+    <section class="screen" id="screen-chart">
+      <div class="screen-title-row">
+        <h1 class="screen-title">Chart</h1>
+        <select id="chart-symbol" class="select-compact"></select>
+      </div>
+      <div class="chart-wrap card">
+        <div class="chart-readout">
+          <span id="chart-price-readout" class="chart-price">—</span>
+          <span class="chart-readout-label">Ticks</span>
+        </div>
+        <div class="chart-canvas-holder">
+          <canvas id="tick-chart"></canvas>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom nav -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-goto="screen-home"><span class="nav-ico">🏠</span><span>Home</span></button>
+    <button class="nav-btn" data-goto="screen-bots"><span class="nav-ico">🤖</span><span>Bots</span></button>
+    <button class="nav-btn" data-goto="screen-builder"><span class="nav-ico">🛠</span><span>Builder</span></button>
+    <button class="nav-btn" data-goto="screen-signals"><span class="nav-ico">📡</span><span>Signals</span></button>
+    <button class="nav-btn" data-goto="screen-chart"><span class="nav-ico">📈</span><span>Chart</span></button>
+  </nav>
+</div>
+
+<!-- Bot run sheet (start/stop controls) -->
+<div class="sheet-overlay hidden" id="run-sheet-overlay">
+  <div class="sheet" id="run-sheet">
+    <div class="sheet-handle"></div>
+    <h2 id="run-sheet-title">Bot</h2>
+    <p class="run-sheet-tagline" id="run-sheet-tagline"></p>
+
+    <div class="field-row">
+      <label class="field half">
+        <span>Stake</span>
+        <input type="number" id="run-stake" value="1" min="0.35" step="0.5" />
+      </label>
+      <label class="field half">
+        <span>Duration (ticks)</span>
+        <input type="number" id="run-duration" value="5" min="1" max="10" />
+      </label>
+    </div>
+    <div class="field-row">
+      <label class="field half">
+        <span>Take profit</span>
+        <input type="number" id="run-tp" placeholder="optional" min="0" step="0.5" />
+      </label>
+      <label class="field half">
+        <span>Stop loss</span>
+        <input type="number" id="run-sl" placeholder="optional" min="0" step="0.5" />
+      </label>
+    </div>
+    <div class="field-row">
+      <label class="field half">
+        <span>Max trades</span>
+        <input type="number" id="run-max" placeholder="optional" min="1" />
+      </label>
+      <label class="field half">
+        <span>Martingale ×</span>
+        <input type="number" id="run-martingale" value="1" min="1" max="4" step="0.1" />
+      </label>
+    </div>
+
+    <div class="run-stats" id="run-stats">
+      <div><span id="run-stat-trades">0</span><small>Trades</small></div>
+      <div><span id="run-stat-wins">0</span><small>Wins</small></div>
+      <div><span id="run-stat-pl">0.00</span><small>P/L</small></div>
+    </div>
+
+    <div class="run-log" id="run-log"></div>
+
+    <div class="run-actions">
+      <button id="run-start-btn" class="btn-primary full">▶ Start bot</button>
+      <button id="run-pause-btn" class="btn-ghost full hidden">⏸ Pause</button>
+      <button id="run-stop-btn" class="btn-danger full hidden">■ Stop bot</button>
+    </div>
+    <button id="run-sheet-close" class="btn-ghost-sm full">Close</button>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+/* ============================================================
+   SidoTrader — Auth module
+   OAuth 2.0 Authorization Code + PKCE against Deriv's new
+   developers.deriv.com auth server.
+   ============================================================ */
+
+const SIDO_CONFIG = {
+  // Your registered OAuth application (App ID / client_id)
+  APP_ID: '33CP1JvyUxBxMJSzanfbT',
+
+  // Must exactly match a redirect URL registered on developers.deriv.com
+  REDIRECT_URI: 'https://sido-great.github.io/sidotrader/callback.html',
+
+  // New OAuth2 endpoints (developers.deriv.com)
+  AUTH_ENDPOINT: 'https://auth.deriv.com/oauth2/auth',
+  TOKEN_ENDPOINT: 'https://auth.deriv.com/oauth2/token',
+
+  // REST API base + trading WebSocket
+  API_BASE: 'https://api.derivws.com',
+  PUBLIC_WS: 'wss://ws.binaryws.com/websockets/v3',
+
+  /*
+   * Scopes — these checkbox labels came straight off your
+   * developers.deriv.com screenshot. The dashboard only shows
+   * human-readable labels, not the raw OAuth scope slugs, so
+   * "app_insights" below is our best-guess slug for
+   * "Application insights". Open your browser's dev tools while
+   * ticking the boxes on the registration page (or check the
+   * generated authorize URL) to confirm the exact slug Deriv
+   * expects, and update SCOPES if it differs.
+   */
+  SCOPES: ['trade', 'account_manage', 'payments'], // 'app_insights' removed — Deriv's auth server rejected it as an unknown scope. See README for how to find the real slug for "Application insights" if you need that one.
+
+  STORAGE_PREFIX: 'sido_'
+};
+
+const SidoAuth = (() => {
+  function randomString(len) {
+    const charset =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+    const arr = crypto.getRandomValues(new Uint8Array(len));
+    return Array.from(arr, (v) => charset[v % charset.length]).join('');
+  }
+
+  function base64url(buffer) {
+    return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+  }
+
+  async function sha256(text) {
+    const data = new TextEncoder().encode(text);
+    return crypto.subtle.digest('SHA-256', data);
+  }
+
+  function safeSet(key, val) {
+    try {
+      sessionStorage.setItem(SIDO_CONFIG.STORAGE_PREFIX + key, val);
+    } catch (e) {
+      /* sessionStorage unavailable (e.g. sandboxed preview) — ignore */
+    }
+  }
+  function safeGet(key) {
+    try {
+      return sessionStorage.getItem(SIDO_CONFIG.STORAGE_PREFIX + key);
+    } catch (e) {
+      return null;
+    }
+  }
+  function safeRemove(key) {
+    try {
+      sessionStorage.removeItem(SIDO_CONFIG.STORAGE_PREFIX + key);
+    } catch (e) {}
+  }
+
+  // Persisted (longer-lived) token storage — localStorage so a refresh
+  // doesn't log the user out. Falls back to an in-memory object if
+  // localStorage is blocked by the hosting environment.
+  const memoryFallback = {};
+  function persistSet(key, val) {
+    try {
+      localStorage.setItem(SIDO_CONFIG.STORAGE_PREFIX + key, val);
+    } catch (e) {
+      memoryFallback[key] = val;
+    }
+  }
+  function persistGet(key) {
+    try {
+      const v = localStorage.getItem(SIDO_CONFIG.STORAGE_PREFIX + key);
+      if (v !== null) return v;
+    } catch (e) {}
+    return memoryFallback[key] ?? null;
+  }
+  function persistRemove(key) {
+    try {
+      localStorage.removeItem(SIDO_CONFIG.STORAGE_PREFIX + key);
+    } catch (e) {}
+    delete memoryFallback[key];
+  }
+
+  /** Kick off the login redirect with a fresh PKCE pair + state. */
+  async function login() {
+    const verifier = randomString(64);
+    const challenge = base64url(await sha256(verifier));
+    const state = randomString(24);
+
+    safeSet('pkce_verifier', verifier);
+    safeSet('oauth_state', state);
+
+    const url = new URL(SIDO_CONFIG.AUTH_ENDPOINT);
+    url.searchParams.set('response_type', 'code');
+    url.searchParams.set('client_id', SIDO_CONFIG.APP_ID);
+    url.searchParams.set('redirect_uri', SIDO_CONFIG.REDIRECT_URI);
+    url.searchParams.set('scope', SIDO_CONFIG.SCOPES.join(' '));
+    url.searchParams.set('state', state);
+    url.searchParams.set('code_challenge', challenge);
+    url.searchParams.set('code_challenge_method', 'S256');
+
+    window.location.href = url.toString();
+  }
+
+  /**
+   * Called from callback.html once Deriv redirects back with
+   * ?code=...&state=.... Verifies state, exchanges the code for a
+   * token, and stores the result.
+   *
+   * NOTE: Deriv's docs recommend doing this exchange from a backend.
+   * SidoTrader is a static, no-backend site, so this happens directly
+   * from the browser. That's the standard pattern for public SPA
+   * clients using PKCE, but if you later add a server, move this
+   * fetch() there for an extra layer of safety.
+   */
+  async function handleCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    if (error) {
+      throw new Error(params.get('error_description') || error);
+    }
+
+    const code = params.get('code');
+    const returnedState = params.get('state');
+    const savedState = safeGet('oauth_state');
+    const verifier = safeGet('pkce_verifier');
+
+    if (!code) throw new Error('No authorization code returned.');
+    if (!returnedState || returnedState !== savedState) {
+      throw new Error('State mismatch — possible CSRF. Please log in again.');
+    }
+    if (!verifier) throw new Error('Missing PKCE verifier — session expired.');
+
+    const res = await fetch(SIDO_CONFIG.TOKEN_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        client_id: SIDO_CONFIG.APP_ID,
+        code,
+        redirect_uri: SIDO_CONFIG.REDIRECT_URI,
+        code_verifier: verifier
+      })
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error('Token exchange failed: ' + res.status + ' ' + text);
+    }
+
+    const data = await res.json();
+    safeRemove('pkce_verifier');
+    safeRemove('oauth_state');
+
+    persistSet('access_token', data.access_token);
+    persistSet('expires_at', String(Date.now() + (data.expires_in || 3600) * 1000));
+    if (data.refresh_token) persistSet('refresh_token', data.refresh_token);
+
+    return data;
+  }
+
+  function getToken() {
+    const token = persistGet('access_token');
+    const expiresAt = Number(persistGet('expires_at') || 0);
+    if (!token || Date.now() > expiresAt) return null;
+    return token;
+  }
+
+  function isLoggedIn() {
+    return !!getToken();
+  }
+
+  function logout() {
+    persistRemove('access_token');
+    persistRemove('expires_at');
+    persistRemove('refresh_token');
+  }
+
+  return { login, handleCallback, getToken, isLoggedIn, logout };
+})();
+
+
+/* ============================================================
+   SidoTrader — API module
+   Wraps the Deriv WebSocket JSON API (ticks, proposal, buy,
+   portfolio, balance, automation) and the REST OTP endpoint
+   used to get an authenticated WebSocket URL.
+   ============================================================ */
+
+const SidoAPI = (() => {
+  let ws = null;
+  let reqCounter = 1;
+  const pending = new Map(); // req_id -> {resolve, reject}
+  const subscribers = new Map(); // msg_type -> Set(callback)
+  let connected = false;
+  let authorizedAccount = null;
+  let reconnectAttempt = 0;
+  const statusListeners = new Set();
+
+  function setStatus(status) {
+    statusListeners.forEach((fn) => fn(status));
+  }
+  function onStatus(fn) {
+    statusListeners.add(fn);
+    return () => statusListeners.delete(fn);
+  }
+
+  function on(msgType, cb) {
+    if (!subscribers.has(msgType)) subscribers.set(msgType, new Set());
+    subscribers.get(msgType).add(cb);
+    return () => subscribers.get(msgType)?.delete(cb);
+  }
+
+  function emit(msgType, data) {
+    subscribers.get(msgType)?.forEach((cb) => cb(data));
+  }
+
+  /** Open the public (unauthenticated) market-data socket. */
+  function connectPublic() {
+    const url = `${SIDO_CONFIG.PUBLIC_WS}?app_id=${SIDO_CONFIG.APP_ID}`;
+    return openSocket(url);
+  }
+
+  /**
+   * Exchange the OAuth access token for an authenticated WS URL via
+   * the OTP REST endpoint, then open it.
+   */
+  async function connectAuthenticated(accessToken, accountId) {
+    const res = await fetch(
+      `${SIDO_CONFIG.API_BASE}/trading/v1/options/accounts/${accountId}/otp`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Deriv-App-ID': SIDO_CONFIG.APP_ID
+        }
+      }
+    );
+    if (!res.ok) throw new Error('Could not get authenticated session (OTP request failed)');
+    const json = await res.json();
+    const url = json?.data?.url;
+    if (!url) throw new Error('OTP response did not include a WebSocket URL');
+    authorizedAccount = accountId;
+    return openSocket(url);
+  }
+
+  function openSocket(url) {
+    return new Promise((resolve, reject) => {
+      try {
+        ws = new WebSocket(url);
+      } catch (e) {
+        reject(e);
+        return;
+      }
+
+      ws.onopen = () => {
+        connected = true;
+        reconnectAttempt = 0;
+        setStatus('connected');
+        resolve(ws);
+      };
+
+      ws.onmessage = (msg) => {
+        let data;
+        try {
+          data = JSON.parse(msg.data);
+        } catch (e) {
+          return;
+        }
+        if (data.req_id && pending.has(data.req_id)) {
+          const { resolve: res, reject: rej } = pending.get(data.req_id);
+          pending.delete(data.req_id);
+          if (data.error) rej(data.error);
+          else res(data);
+        }
+        if (data.msg_type) emit(data.msg_type, data);
+      };
+
+      ws.onerror = () => setStatus('error');
+
+      ws.onclose = () => {
+        connected = false;
+        setStatus('disconnected');
+      };
+    });
+  }
+
+  /** Send a request and resolve with the matching response. */
+  function send(payload, timeoutMs = 15000) {
+    return new Promise((resolve, reject) => {
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        reject(new Error('Not connected'));
+        return;
+      }
+      const req_id = reqCounter++;
+      const body = { ...payload, req_id };
+      pending.set(req_id, { resolve, reject });
+      ws.send(JSON.stringify(body));
+      setTimeout(() => {
+        if (pending.has(req_id)) {
+          pending.delete(req_id);
+          reject(new Error('Request timed out: ' + Object.keys(payload)[0]));
+        }
+      }, timeoutMs);
+    });
+  }
+
+  /** Fire-and-subscribe request — resolves once, then streams via on(). */
+  function subscribe(payload) {
+    return send({ ...payload, subscribe: 1 });
+  }
+
+  function unsubscribeAll() {
+    return send({ forget_all: ['ticks', 'proposal', 'proposal_open_contract', 'balance'] }).catch(
+      () => {}
+    );
+  }
+
+  function close() {
+    if (ws) {
+      try {
+        ws.close();
+      } catch (e) {}
+    }
+    ws = null;
+    connected = false;
+  }
+
+  function isConnected() {
+    return connected;
+  }
+
+  // ---- Convenience wrappers -------------------------------------------
+
+  const ticksHistory = (symbol, count = 200) =>
+    send({
+      ticks_history: symbol,
+      count,
+      end: 'latest',
+      style: 'ticks'
+    });
+
+  const activeSymbols = () => send({ active_symbols: 'brief', product_type: 'basic' });
+
+  const getBalance = () => subscribe({ balance: 1 });
+
+  const getPortfolio = () => send({ portfolio: 1 });
+
+  const proposal = (params) => subscribe({ proposal: 1, ...params });
+
+  const buy = (proposalId, price) => send({ buy: proposalId, price });
+
+  const sell = (contractId, price) => send({ sell: contractId, price });
+
+  const proposalOpenContract = (contractId) =>
+    subscribe({ proposal_open_contract: 1, contract_id: contractId });
+
+  const forget = (id) => send({ forget: id }).catch(() => {});
+
+  // ---- Automation API (beta) --------------------------------------------
+  // Schema confirmed: auto_list_strategies, auto_start, auto_get, auto_list,
+  // auto_pause, auto_resume, auto_stop. Field-level shape for auto_start
+  // wasn't published in the docs at the time this was written, so this is
+  // a best-effort wrapper — verify against the live schema/Playground at
+  // developers.deriv.com/docs/trading/auto-start before relying on it.
+  const autoListStrategies = () => send({ auto_list_strategies: 1 });
+  const autoStart = (strategyId, params = {}) =>
+    send({ auto_start: 1, strategy_id: strategyId, parameters: params });
+  const autoGet = (runId) => send({ auto_get: 1, run_id: runId });
+  const autoList = () => send({ auto_list: 1 });
+  const autoPause = (runId) => send({ auto_pause: 1, run_id: runId });
+  const autoResume = (runId) => send({ auto_resume: 1, run_id: runId });
+  const autoStop = (runId) => send({ auto_stop: 1, run_id: runId });
+
+  return {
+    connectPublic,
+    connectAuthenticated,
+    send,
+    subscribe,
+    unsubscribeAll,
+    close,
+    isConnected,
+    on,
+    onStatus,
+    ticksHistory,
+    activeSymbols,
+    getBalance,
+    getPortfolio,
+    proposal,
+    buy,
+    sell,
+    proposalOpenContract,
+    forget,
+    autoListStrategies,
+    autoStart,
+    autoGet,
+    autoList,
+    autoPause,
+    autoResume,
+    autoStop
+  };
+})();
+
+
+/* ============================================================
+   SidoTrader — Chart module
+   Lightweight canvas line chart plotting live ticks. No external
+   charting library — keeps the app fast and dependency-free.
+   ============================================================ */
+
+const SidoChart = (() => {
+  let canvas, ctx;
+  let points = []; // {t, quote}
+  let maxPoints = 120;
+  let symbol = '1HZ100V';
+  let unsubTick = null;
+  let dpr = window.devicePixelRatio || 1;
+  let lastDirection = 0; // 1 up, -1 down, 0 flat
+
+  function init(canvasEl) {
+    canvas = canvasEl;
+    ctx = canvas.getContext('2d');
+    resize();
+    window.addEventListener('resize', resize);
+  }
+
+  function resize() {
+    if (!canvas) return;
+    const rect = canvas.parentElement.getBoundingClientRect();
+    dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+    draw();
+  }
+
+  async function loadSymbol(newSymbol) {
+    symbol = newSymbol;
+    points = [];
+    if (unsubTick) {
+      unsubTick();
+      unsubTick = null;
+    }
+    try {
+      const hist = await SidoAPI.ticksHistory(symbol, maxPoints);
+      const prices = hist?.history?.prices || [];
+      const times = hist?.history?.times || [];
+      points = prices.map((p, i) => ({ t: times[i], quote: Number(p) }));
+    } catch (e) {
+      points = [];
+    }
+
+    unsubTick = SidoAPI.on('tick', (data) => {
+      if (data.tick?.symbol !== symbol) return;
+      const quote = Number(data.tick.quote);
+      const prev = points[points.length - 1]?.quote;
+      if (prev !== undefined) lastDirection = quote > prev ? 1 : quote < prev ? -1 : 0;
+      points.push({ t: data.tick.epoch, quote });
+      if (points.length > maxPoints) points.shift();
+      draw();
+      updateReadout(quote);
+    });
+
+    await SidoAPI.subscribe({ ticks: symbol }).catch(() => {});
+    draw();
+    if (points.length) updateReadout(points[points.length - 1].quote);
+  }
+
+  function updateReadout(quote) {
+    const el = document.getElementById('chart-price-readout');
+    if (!el) return;
+    el.textContent = quote.toFixed(getDecimals());
+    el.classList.remove('up', 'down');
+    el.classList.add(lastDirection >= 0 ? 'up' : 'down');
+  }
+
+  function getDecimals() {
+    if (!points.length) return 2;
+    const s = String(points[points.length - 1].quote);
+    const dot = s.indexOf('.');
+    return dot === -1 ? 0 : s.length - dot - 1;
+  }
+
+  function draw() {
+    if (!ctx || !canvas) return;
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    if (points.length < 2) return;
+
+    const quotes = points.map((p) => p.quote);
+    const min = Math.min(...quotes);
+    const max = Math.max(...quotes);
+    const pad = (max - min) * 0.15 || 1;
+    const yMin = min - pad;
+    const yMax = max + pad;
+
+    const stepX = w / (maxPoints - 1);
+    const startIdx = maxPoints - points.length;
+
+    const up = lastDirection >= 0;
+    const lineColor = up ? '#34d399' : '#fb7185';
+    const glowColor = up ? 'rgba(52,211,153,0.35)' : 'rgba(251,113,133,0.35)';
+
+    // grid
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1 * dpr;
+    for (let i = 1; i < 4; i++) {
+      const y = (h / 4) * i;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+
+    // area fill
+    ctx.beginPath();
+    points.forEach((p, i) => {
+      const x = (startIdx + i) * stepX;
+      const y = h - ((p.quote - yMin) / (yMax - yMin)) * h;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.lineTo((startIdx + points.length - 1) * stepX, h);
+    ctx.lineTo(startIdx * stepX, h);
+    ctx.closePath();
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, glowColor);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // line
+    ctx.beginPath();
+    points.forEach((p, i) => {
+      const x = (startIdx + i) * stepX;
+      const y = h - ((p.quote - yMin) / (yMax - yMin)) * h;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 2.5 * dpr;
+    ctx.lineJoin = 'round';
+    ctx.shadowColor = glowColor;
+    ctx.shadowBlur = 8 * dpr;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // last point dot
+    const last = points[points.length - 1];
+    const lastX = (startIdx + points.length - 1) * stepX;
+    const lastY = h - ((last.quote - yMin) / (yMax - yMin)) * h;
+    ctx.beginPath();
+    ctx.arc(lastX, lastY, 4 * dpr, 0, Math.PI * 2);
+    ctx.fillStyle = lineColor;
+    ctx.fill();
+  }
+
+  function currentSymbol() {
+    return symbol;
+  }
+
+  function recentQuotes() {
+    return points.map((p) => p.quote);
+  }
+
+  function destroy() {
+    if (unsubTick) unsubTick();
+    window.removeEventListener('resize', resize);
+  }
+
+  return { init, loadSymbol, resize, currentSymbol, recentQuotes, destroy };
+})();
+
+
+/* ============================================================
+   SidoTrader — Signals module
+   "AI signals" here means a transparent, rule-based read of
+   recent tick history (moving averages, RSI, digit bias) — not
+   a black-box prediction. Synthetic indices are generated by a
+   random process, so treat every signal as educational, not
+   financial advice.
+   ============================================================ */
+
+const SidoSignals = (() => {
+  function sma(arr, period) {
+    if (arr.length < period) return null;
+    const slice = arr.slice(arr.length - period);
+    return slice.reduce((a, b) => a + b, 0) / period;
+  }
+
+  function rsi(arr, period = 14) {
+    if (arr.length < period + 1) return null;
+    let gains = 0;
+    let losses = 0;
+    const slice = arr.slice(arr.length - period - 1);
+    for (let i = 1; i < slice.length; i++) {
+      const diff = slice[i] - slice[i - 1];
+      if (diff >= 0) gains += diff;
+      else losses -= diff;
+    }
+    const avgGain = gains / period;
+    const avgLoss = losses / period;
+    if (avgLoss === 0) return 100;
+    const rs = avgGain / avgLoss;
+    return 100 - 100 / (1 + rs);
+  }
+
+  function digitBias(arr) {
+    const digits = arr.map((q) => {
+      const s = String(q).replace('.', '');
+      return Number(s[s.length - 1]);
+    });
+    const evens = digits.filter((d) => d % 2 === 0).length;
+    return { evenPct: (evens / digits.length) * 100, oddPct: 100 - (evens / digits.length) * 100 };
+  }
+
+  /** Build a composite signal from recent quotes. */
+  function analyze(quotes) {
+    if (!quotes || quotes.length < 20) {
+      return { ready: false };
+    }
+    const fast = sma(quotes, 8);
+    const slow = sma(quotes, 24);
+    const rsiVal = rsi(quotes, 14);
+    const bias = digitBias(quotes.slice(-30));
+    const last = quotes[quotes.length - 1];
+
+    let trendScore = 0;
+    if (fast !== null && slow !== null) {
+      trendScore = ((fast - slow) / slow) * 100;
+    }
+
+    let direction = 'Neutral';
+    let confidence = 50;
+
+    if (trendScore > 0.01 && rsiVal !== null && rsiVal < 75) {
+      direction = 'Up';
+      confidence = Math.min(95, 55 + Math.abs(trendScore) * 400 + (rsiVal > 50 ? 5 : 0));
+    } else if (trendScore < -0.01 && rsiVal !== null && rsiVal > 25) {
+      direction = 'Down';
+      confidence = Math.min(95, 55 + Math.abs(trendScore) * 400 + (rsiVal < 50 ? 5 : 0));
+    } else {
+      direction = 'Neutral';
+      confidence = 50 + Math.round(Math.random() * 5);
+    }
+
+    let overboughtNote = null;
+    if (rsiVal !== null) {
+      if (rsiVal > 70) overboughtNote = 'RSI suggests overbought conditions';
+      else if (rsiVal < 30) overboughtNote = 'RSI suggests oversold conditions';
+    }
+
+    return {
+      ready: true,
+      last,
+      direction,
+      confidence: Math.round(confidence),
+      rsi: rsiVal !== null ? Math.round(rsiVal) : null,
+      fast,
+      slow,
+      digitBias: bias,
+      note: overboughtNote
+    };
+  }
+
+  return { analyze };
+})();
+
+
+/* ============================================================
+   SidoTrader — Bots module
+   A small library of built-in strategies + a run engine that
+   turns a strategy's decisions into proposal -> buy -> monitor
+   cycles, with stake management, stop-loss/take-profit and a
+   trade log. Bots built in the Builder tab and bots imported via
+   Upload share this same engine.
+   ============================================================ */
+
+const SidoBots = (() => {
+  // ---- Strategy decision helpers --------------------------------------
+
+  function sma(arr, period) {
+    if (arr.length < period) return null;
+    const slice = arr.slice(arr.length - period);
+    return slice.reduce((a, b) => a + b, 0) / period;
+  }
+
+  function lastDigit(quote) {
+    const s = String(quote).replace('.', '');
+    return Number(s[s.length - 1]);
+  }
+
+  // ---- Built-in strategy library ---------------------------------------
+
+  const BUILTIN_STRATEGIES = [
+    {
+      id: 'trend-rider',
+      name: 'Trend Rider',
+      tagline: 'Rise/Fall on an 8/24 SMA crossover',
+      accent: 'violet',
+      defaultSymbol: '1HZ100V',
+      decide(history) {
+        const fast = sma(history, 8);
+        const slow = sma(history, 24);
+        if (fast === null || slow === null) return null;
+        if (fast > slow * 1.0003) return { contract_type: 'CALL' };
+        if (fast < slow * 0.9997) return { contract_type: 'PUT' };
+        return null;
+      }
+    },
+    {
+      id: 'even-odd-flip',
+      name: 'Even/Odd Flip',
+      tagline: 'Bets against a streak of repeating last digits',
+      accent: 'cyan',
+      defaultSymbol: '1HZ100V',
+      decide(history) {
+        if (history.length < 5) return null;
+        const digits = history.slice(-5).map(lastDigit);
+        const allEven = digits.every((d) => d % 2 === 0);
+        const allOdd = digits.every((d) => d % 2 !== 0);
+        if (allEven) return { contract_type: 'DIGITODD' };
+        if (allOdd) return { contract_type: 'DIGITEVEN' };
+        return null;
+      }
+    },
+    {
+      id: 'over-under-sniper',
+      name: 'Over/Under Sniper',
+      tagline: 'Targets digit extremes after a quiet run',
+      accent: 'amber',
+      defaultSymbol: '1HZ100V',
+      decide(history) {
+        if (history.length < 10) return null;
+        const digits = history.slice(-10).map(lastDigit);
+        const avg = digits.reduce((a, b) => a + b, 0) / digits.length;
+        if (avg < 3.5) return { contract_type: 'DIGITOVER', barrier: '2' };
+        if (avg > 5.5) return { contract_type: 'DIGITUNDER', barrier: '7' };
+        return null;
+      }
+    }
+  ];
+
+  // ---- Run engine --------------------------------------------------------
+
+  class BotRun {
+    constructor({ strategy, symbol, stake, duration, durationUnit, takeProfit, stopLoss, maxTrades, martingaleMultiplier, currency }) {
+      this.id = 'run_' + Math.random().toString(36).slice(2, 9);
+      this.strategy = strategy;
+      this.symbol = symbol;
+      this.baseStake = Number(stake) || 1;
+      this.stake = this.baseStake;
+      this.duration = Number(duration) || 1;
+      this.durationUnit = durationUnit || 'm';
+      this.takeProfit = takeProfit ? Number(takeProfit) : null;
+      this.stopLoss = stopLoss ? Number(stopLoss) : null;
+      this.maxTrades = maxTrades ? Number(maxTrades) : null;
+      this.martingaleMultiplier = martingaleMultiplier ? Number(martingaleMultiplier) : 1;
+      this.currency = currency || 'USD';
+
+      this.status = 'idle'; // idle | running | paused | stopped
+      this.busy = false;
+      this.history = [];
+      this.stats = { trades: 0, wins: 0, losses: 0, pnl: 0 };
+      this.log = [];
+      this._unsubTick = null;
+      this.listeners = new Set();
+    }
+
+    onUpdate(fn) {
+      this.listeners.add(fn);
+      return () => this.listeners.delete(fn);
+    }
+    _emit() {
+      this.listeners.forEach((fn) => fn(this));
+    }
+    _logLine(text) {
+      this.log.unshift({ t: Date.now(), text });
+      this.log = this.log.slice(0, 50);
+      this._emit();
+    }
+
+    async start() {
+      if (this.status === 'running') return;
+      this.status = 'running';
+      this._logLine(`Started on ${this.symbol}, stake ${this.stake.toFixed(2)} ${this.currency}`);
+
+      try {
+        const hist = await SidoAPI.ticksHistory(this.symbol, 60);
+        this.history = (hist?.history?.prices || []).map(Number);
+      } catch (e) {
+        this.history = [];
+      }
+
+      this._unsubTick = SidoAPI.on('tick', (data) => {
+        if (data.tick?.symbol !== this.symbol) return;
+        this.history.push(Number(data.tick.quote));
+        if (this.history.length > 200) this.history.shift();
+        this._onTick();
+      });
+
+      await SidoAPI.subscribe({ ticks: this.symbol }).catch(() => {});
+      this._emit();
+    }
+
+    pause() {
+      if (this.status !== 'running') return;
+      this.status = 'paused';
+      this._logLine('Paused');
+      this._emit();
+    }
+
+    resume() {
+      if (this.status !== 'paused') return;
+      this.status = 'running';
+      this._logLine('Resumed');
+      this._emit();
+    }
+
+    stop() {
+      this.status = 'stopped';
+      if (this._unsubTick) {
+        this._unsubTick();
+        this._unsubTick = null;
+      }
+      this._logLine('Stopped — no further contracts will be purchased');
+      this._emit();
+    }
+
+    async _onTick() {
+      if (this.status !== 'running' || this.busy) return;
+      if (this.maxTrades && this.stats.trades >= this.maxTrades) {
+        this._logLine(`Max trades (${this.maxTrades}) reached`);
+        this.stop();
+        return;
+      }
+      if (this.takeProfit !== null && this.stats.pnl >= this.takeProfit) {
+        this._logLine(`Take-profit hit (+${this.stats.pnl.toFixed(2)})`);
+        this.stop();
+        return;
+      }
+      if (this.stopLoss !== null && this.stats.pnl <= -Math.abs(this.stopLoss)) {
+        this._logLine(`Stop-loss hit (${this.stats.pnl.toFixed(2)})`);
+        this.stop();
+        return;
+      }
+
+      let decision = null;
+      try {
+        decision = this.strategy.decide(this.history, this.stats);
+      } catch (e) {
+        return;
+      }
+      if (!decision) return;
+
+      this.busy = true;
+      try {
+        await this._executeTrade(decision);
+      } catch (e) {
+        this._logLine('Error: ' + (e?.message || e?.error?.message || String(e)));
+      } finally {
+        this.busy = false;
+      }
+    }
+
+    async _executeTrade(decision) {
+      const params = {
+        amount: this.stake,
+        basis: 'stake',
+        contract_type: decision.contract_type,
+        currency: this.currency,
+        duration: this.duration,
+        duration_unit: this.durationUnit,
+        symbol: this.symbol
+      };
+      if (decision.barrier) params.barrier = decision.barrier;
+
+      const prop = await SidoAPI.proposal(params);
+      const proposalId = prop?.proposal?.id;
+      const askPrice = prop?.proposal?.ask_price ?? this.stake;
+      if (!proposalId) {
+        this._logLine('No proposal returned — skipping');
+        return;
+      }
+
+      const bought = await SidoAPI.buy(proposalId, askPrice);
+      const contractId = bought?.buy?.contract_id;
+      this._logLine(`Bought ${decision.contract_type} for ${askPrice} — contract ${contractId || '?'}`);
+
+      if (!contractId) return;
+
+      const result = await this._waitForContractResult(contractId);
+      this.stats.trades += 1;
+      if (result.profit >= 0) this.stats.wins += 1;
+      else this.stats.losses += 1;
+      this.stats.pnl += result.profit;
+
+      if (result.profit < 0 && this.martingaleMultiplier > 1) {
+        this.stake = this.stake * this.martingaleMultiplier;
+      } else {
+        this.stake = this.baseStake;
+      }
+
+      this._logLine(
+        `${result.profit >= 0 ? '✅ Win' : '❌ Loss'} ${result.profit.toFixed(2)} ${this.currency} — running P/L ${this.stats.pnl.toFixed(2)}`
+      );
+      this._emit();
+    }
+
+    _waitForContractResult(contractId) {
+      return new Promise((resolve) => {
+        const unsub = SidoAPI.on('proposal_open_contract', (data) => {
+          const c = data.proposal_open_contract;
+          if (!c || c.contract_id !== contractId) return;
+          if (c.is_sold || c.status === 'sold') {
+            unsub();
+            SidoAPI.forget(c.id);
+            resolve({ profit: Number(c.profit) || 0 });
+          }
+        });
+        SidoAPI.proposalOpenContract(contractId).catch(() => {});
+      });
+    }
+  }
+
+  function findStrategy(id) {
+    return BUILTIN_STRATEGIES.find((s) => s.id === id);
+  }
+
+  /** Wrap an imported/builder-made strategy config into a decide() fn. */
+  function compileCustomStrategy(config) {
+    // config: { entry: 'sma_cross' | 'digit_parity' | 'rsi', ...thresholds, contractUp, contractDown }
+    return {
+      id: config.id || 'custom_' + Math.random().toString(36).slice(2, 8),
+      name: config.name || 'Custom bot',
+      tagline: config.tagline || 'Imported / builder strategy',
+      accent: config.accent || 'rose',
+      defaultSymbol: config.symbol || '1HZ100V',
+      decide(history) {
+        if (config.entry === 'sma_cross') {
+          const fast = sma(history, config.fastPeriod || 8);
+          const slow = sma(history, config.slowPeriod || 24);
+          if (fast === null || slow === null) return null;
+          if (fast > slow) return { contract_type: config.contractUp || 'CALL' };
+          if (fast < slow) return { contract_type: config.contractDown || 'PUT' };
+          return null;
+        }
+        if (config.entry === 'digit_parity') {
+          if (history.length < (config.streak || 4)) return null;
+          const digits = history.slice(-(config.streak || 4)).map(lastDigit);
+          const allEven = digits.every((d) => d % 2 === 0);
+          const allOdd = digits.every((d) => d % 2 !== 0);
+          if (allEven) return { contract_type: config.contractDown || 'DIGITODD' };
+          if (allOdd) return { contract_type: config.contractUp || 'DIGITEVEN' };
+          return null;
+        }
+        return null;
+      }
+    };
+  }
+
+  return { BUILTIN_STRATEGIES, findStrategy, compileCustomStrategy, BotRun };
+})();
+
+
+/* ============================================================
+   SidoTrader — Builder module
+   A simple, form-driven bot builder (entry condition + contract
+   type + money management) that compiles down to the same
+   strategy shape the run engine understands. Bots can be saved
+   locally, exported to a .json file, or re-imported via Upload.
+   ============================================================ */
+
+const SidoBuilder = (() => {
+  const STORE_KEY = 'sido_custom_bots';
+
+  function safeLoad() {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function safeSave(list) {
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(list));
+    } catch (e) {
+      /* storage unavailable — bot still works for this session */
+    }
+  }
+
+  function listCustomBots() {
+    return safeLoad();
+  }
+
+  function saveBot(config) {
+    const list = safeLoad();
+    const idx = list.findIndex((b) => b.id === config.id);
+    if (idx >= 0) list[idx] = config;
+    else list.push(config);
+    safeSave(list);
+    return config;
+  }
+
+  function deleteBot(id) {
+    safeSave(safeLoad().filter((b) => b.id !== id));
+  }
+
+  function exportBot(config) {
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(config.name || 'sido-bot').replace(/\s+/g, '-').toLowerCase()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  /** Parse + lightly validate an uploaded bot JSON file. */
+  function parseUploadedBot(text) {
+    let json;
+    try {
+      json = JSON.parse(text);
+    } catch (e) {
+      throw new Error('That file is not valid JSON.');
+    }
+    if (!json.entry || !['sma_cross', 'digit_parity'].includes(json.entry)) {
+      throw new Error('Unrecognised bot format — expected an "entry" of sma_cross or digit_parity.');
+    }
+    if (!json.id) json.id = 'custom_' + Math.random().toString(36).slice(2, 8);
+    if (!json.name) json.name = 'Uploaded bot';
+    return json;
+  }
+
+  /** Build a config object from the builder form's current values. */
+  function buildFromForm(form) {
+    const entry = form.entry.value;
+    const config = {
+      id: 'custom_' + Math.random().toString(36).slice(2, 8),
+      name: form.name.value || 'My bot',
+      tagline: 'Built in Bot Builder',
+      accent: 'rose',
+      symbol: form.symbol.value,
+      entry,
+      contractUp: form.contractUp.value,
+      contractDown: form.contractDown.value
+    };
+    if (entry === 'sma_cross') {
+      config.fastPeriod = Number(form.fastPeriod.value) || 8;
+      config.slowPeriod = Number(form.slowPeriod.value) || 24;
+    } else if (entry === 'digit_parity') {
+      config.streak = Number(form.streak.value) || 4;
+    }
+    return config;
+  }
+
+  return { listCustomBots, saveBot, deleteBot, exportBot, parseUploadedBot, buildFromForm };
+})();
+
+
+/* ============================================================
+   SidoTrader — App module
+   Wires up navigation, the OAuth session, account info, the
+   bots list, builder, signals and chart screens.
+   ============================================================ */
+
+const SYMBOLS = [
+  { value: '1HZ100V', label: 'Volatility 100 (1s) Index' },
+  { value: '1HZ50V', label: 'Volatility 50 (1s) Index' },
+  { value: '1HZ25V', label: 'Volatility 25 (1s) Index' },
+  { value: 'R_100', label: 'Volatility 100 Index' },
+  { value: 'R_75', label: 'Volatility 75 Index' },
+  { value: 'BOOM500', label: 'Boom 500 Index' },
+  { value: 'CRASH500', label: 'Crash 500 Index' }
+];
+
+let activeRun = null; // current BotRun shown in the sheet
+let accountInfo = null; // { loginid, balance, currency, is_virtual }
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.add('hidden'), 3200);
+}
+
+function fillSymbolSelects() {
+  const selects = [
+    document.getElementById('builder-symbol'),
+    document.getElementById('signals-symbol'),
+    document.getElementById('chart-symbol')
+  ];
+  selects.forEach((sel) => {
+    if (!sel) return;
+    sel.innerHTML = SYMBOLS.map((s) => `<option value="${s.value}">${s.label}</option>`).join('');
+  });
+}
+
+/* ---------------------------- Navigation ---------------------------- */
+
+function goto(screenId) {
+  document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
+  document.getElementById(screenId)?.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach((b) =>
+    b.classList.toggle('active', b.dataset.goto === screenId)
+  );
+  if (screenId === 'screen-chart') {
+    requestAnimationFrame(() => SidoChart.resize());
+  }
+}
+
+document.addEventListener('click', (e) => {
+  const target = e.target.closest('[data-goto]');
+  if (target) goto(target.dataset.goto);
+});
+
+/* ------------------------------ Auth UI ------------------------------ */
+
+function renderAuthState() {
+  const loggedIn = SidoAuth.isLoggedIn();
+  document.getElementById('login-btn').classList.toggle('hidden', loggedIn);
+  document.getElementById('account-chip').classList.toggle('hidden', !loggedIn);
+  document.getElementById('home-login-btn').classList.toggle('hidden', loggedIn);
+  document.getElementById('home-logout-btn').classList.toggle('hidden', !loggedIn);
+}
+
+document.getElementById('login-btn').addEventListener('click', () => SidoAuth.login());
+document.getElementById('home-login-btn').addEventListener('click', () => SidoAuth.login());
+document.getElementById('home-logout-btn').addEventListener('click', () => {
+  SidoAuth.logout();
+  SidoAPI.close();
+  accountInfo = null;
+  renderAuthState();
+  updateAccountChip();
+  toast('Logged out');
+  bootConnection();
+});
+
+function updateAccountChip() {
+  const balEl = document.getElementById('account-balance');
+  const tagEl = document.getElementById('account-tag');
+  const heroBal = document.getElementById('hero-balance');
+  const heroCur = document.getElementById('hero-currency');
+  if (accountInfo) {
+    balEl.textContent = `${Number(accountInfo.balance).toFixed(2)}`;
+    tagEl.textContent = accountInfo.is_virtual ? 'DEMO' : 'REAL';
+    tagEl.classList.toggle('real', !accountInfo.is_virtual);
+    heroBal.textContent = Number(accountInfo.balance).toFixed(2);
+    heroCur.textContent = accountInfo.currency || '';
+  } else {
+    balEl.textContent = '—';
+    heroBal.textContent = '—';
+    heroCur.textContent = '';
+  }
+}
+
+function setConnStatus(status) {
+  const dot = document.getElementById('conn-dot');
+  const heroText = document.getElementById('hero-conn-text');
+  dot.classList.remove('ok', 'bad');
+  if (status === 'connected') {
+    dot.classList.add('ok');
+    heroText.textContent = SidoAuth.isLoggedIn() ? 'Connected (live account data)' : 'Connected (market data only)';
+  } else {
+    dot.classList.add('bad');
+    heroText.textContent = status === 'error' ? 'Connection error' : 'Not connected';
+  }
+}
+
+/* --------------------------- Boot connection -------------------------- */
+
+async function bootConnection() {
+  SidoAPI.onStatus(setConnStatus);
+
+  try {
+    if (SidoAuth.isLoggedIn()) {
+      // We need an account id to request an OTP. Try a previously cached
+      // one first; otherwise fall back to the public feed and let the
+      // user know account-scoped data (balance, buy/sell) needs that step.
+      const cachedAccount = localStorage.getItem('sido_account_id');
+      if (cachedAccount) {
+        await SidoAPI.connectAuthenticated(SidoAuth.getToken(), cachedAccount);
+        const bal = await SidoAPI.getBalance().catch(() => null);
+        if (bal?.balance) {
+          accountInfo = {
+            balance: bal.balance.balance,
+            currency: bal.balance.currency,
+            is_virtual: cachedAccount.startsWith('VR')
+          };
+          updateAccountChip();
+        }
+      } else {
+        await SidoAPI.connectPublic();
+        toast('Logged in — open Settings in your Deriv dashboard if account data is missing an account id.');
+      }
+    } else {
+      await SidoAPI.connectPublic();
+    }
+  } catch (e) {
+    console.error(e);
+    toast('Could not connect: ' + (e?.message || 'unknown error'));
+    try {
+      await SidoAPI.connectPublic();
+    } catch (e2) {}
+  }
+
+  SidoChart.loadSymbol(document.getElementById('chart-symbol').value || '1HZ100V');
+}
+
+/* ------------------------------ Bots list ------------------------------ */
+
+function renderBuiltinBots() {
+  const wrap = document.getElementById('builtin-bots-list');
+  wrap.innerHTML = SidoBots.BUILTIN_STRATEGIES.map(
+    (s) => `
+    <div class="bot-row accent-${s.accent}">
+      <div class="bot-row-main">
+        <p class="bot-name">${s.name}</p>
+        <p class="bot-tagline">${s.tagline}</p>
+      </div>
+      <button class="btn-pill" data-run-strategy="${s.id}">Run</button>
+    </div>`
+  ).join('');
+}
+
+function renderMyBots() {
+  const wrap = document.getElementById('mine-bots-list');
+  const bots = SidoBuilder.listCustomBots();
+  if (!bots.length) {
+    wrap.innerHTML = `<p class="empty-note">No saved bots yet. Build one in the Builder tab, or upload a .json bot below.</p>`;
+    return;
+  }
+  wrap.innerHTML = bots
+    .map(
+      (b) => `
+    <div class="bot-row accent-${b.accent || 'rose'}">
+      <div class="bot-row-main">
+        <p class="bot-name">${b.name}</p>
+        <p class="bot-tagline">${b.tagline || 'Custom bot'} · ${b.symbol}</p>
+      </div>
+      <div class="bot-row-actions">
+        <button class="btn-icon-sm" data-export-bot="${b.id}" title="Export">⬇</button>
+        <button class="btn-icon-sm" data-delete-bot="${b.id}" title="Delete">✕</button>
+        <button class="btn-pill" data-run-custom="${b.id}">Run</button>
+      </div>
+    </div>`
+    )
+    .join('');
+}
+
+document.querySelectorAll('.mini-tab').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mini-tab').forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+    const view = btn.dataset.botsView;
+    document.getElementById('builtin-bots-list').classList.toggle('hidden', view !== 'builtin');
+    document.getElementById('mine-bots-list').classList.toggle('hidden', view !== 'mine');
+    document.getElementById('upload-box-bots').classList.toggle('hidden', view !== 'mine');
+    if (view === 'mine') renderMyBots();
+  });
+});
+
+document.addEventListener('click', (e) => {
+  const runBtn = e.target.closest('[data-run-strategy]');
+  if (runBtn) openRunSheet(SidoBots.findStrategy(runBtn.dataset.runStrategy));
+
+  const runCustomBtn = e.target.closest('[data-run-custom]');
+  if (runCustomBtn) {
+    const cfg = SidoBuilder.listCustomBots().find((b) => b.id === runCustomBtn.dataset.runCustom);
+    if (cfg) openRunSheet(SidoBots.compileCustomStrategy(cfg));
+  }
+
+  const exportBtn = e.target.closest('[data-export-bot]');
+  if (exportBtn) {
+    const cfg = SidoBuilder.listCustomBots().find((b) => b.id === exportBtn.dataset.exportBot);
+    if (cfg) SidoBuilder.exportBot(cfg);
+  }
+
+  const deleteBtn = e.target.closest('[data-delete-bot]');
+  if (deleteBtn) {
+    SidoBuilder.deleteBot(deleteBtn.dataset.deleteBot);
+    renderMyBots();
+    toast('Bot deleted');
+  }
+});
+
+document.getElementById('upload-bot-input').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const cfg = SidoBuilder.parseUploadedBot(text);
+    SidoBuilder.saveBot(cfg);
+    renderMyBots();
+    toast(`Imported "${cfg.name}"`);
+  } catch (err) {
+    toast(err.message);
+  }
+  e.target.value = '';
+});
+
+/* ------------------------------- Builder ------------------------------- */
+
+document.getElementById('builder-entry').addEventListener('change', (e) => {
+  const isSma = e.target.value === 'sma_cross';
+  document.getElementById('builder-entry-sma').classList.toggle('hidden', !isSma);
+  document.getElementById('builder-entry-digit').classList.toggle('hidden', isSma);
+});
+
+document.getElementById('builder-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const cfg = SidoBuilder.buildFromForm(e.target);
+  SidoBuilder.saveBot(cfg);
+  toast(`Saved "${cfg.name}" — find it under Bots → My bots`);
+  e.target.reset();
+  document.getElementById('builder-entry-sma').classList.remove('hidden');
+  document.getElementById('builder-entry-digit').classList.add('hidden');
+});
+
+/* ------------------------------- Signals ------------------------------- */
+
+async function refreshSignal() {
+  const symbol = document.getElementById('signals-symbol').value;
+  const card = document.getElementById('signal-card');
+  card.innerHTML = `<p class="signal-placeholder">Analysing ${symbol}…</p>`;
+  let quotes = [];
+  try {
+    const hist = await SidoAPI.ticksHistory(symbol, 60);
+    quotes = (hist?.history?.prices || []).map(Number);
+  } catch (e) {
+    card.innerHTML = `<p class="signal-placeholder">Could not fetch ticks. Check your connection and try again.</p>`;
+    return;
+  }
+  const result = SidoSignals.analyze(quotes);
+  if (!result.ready) {
+    card.innerHTML = `<p class="signal-placeholder">Not enough tick history yet — try again in a moment.</p>`;
+    return;
+  }
+  const dirClass = result.direction === 'Up' ? 'up' : result.direction === 'Down' ? 'down' : 'flat';
+  card.innerHTML = `
+    <div class="signal-top">
+      <span class="signal-dir ${dirClass}">${result.direction}</span>
+      <span class="signal-confidence">${result.confidence}% confidence</span>
+    </div>
+    <p class="signal-last">Last quote: <strong>${result.last}</strong></p>
+    <div class="signal-meta">
+      <div><small>RSI(14)</small><strong>${result.rsi ?? '—'}</strong></div>
+      <div><small>Even digits</small><strong>${result.digitBias.evenPct.toFixed(0)}%</strong></div>
+      <div><small>Odd digits</small><strong>${result.digitBias.oddPct.toFixed(0)}%</strong></div>
+    </div>
+    ${result.note ? `<p class="signal-note">${result.note}</p>` : ''}
+    <p class="signal-disclaimer">Rule-based read of recent ticks for this synthetic index — not a guarantee, not financial advice.</p>
+  `;
+}
+
+document.getElementById('signals-refresh').addEventListener('click', refreshSignal);
+document.getElementById('signals-symbol').addEventListener('change', refreshSignal);
+
+/* -------------------------------- Chart -------------------------------- */
+
+document.getElementById('chart-symbol').addEventListener('change', (e) => {
+  SidoChart.loadSymbol(e.target.value);
+});
+
+/* ------------------------------ Run sheet ------------------------------ */
+
+function openRunSheet(strategy) {
+  activeRun = null;
+  document.getElementById('run-sheet-title').textContent = strategy.name;
+  document.getElementById('run-sheet-tagline').textContent = strategy.tagline;
+  document.getElementById('run-log').innerHTML = '';
+  document.getElementById('run-stat-trades').textContent = '0';
+  document.getElementById('run-stat-wins').textContent = '0';
+  document.getElementById('run-stat-pl').textContent = '0.00';
+  document.getElementById('run-start-btn').classList.remove('hidden');
+  document.getElementById('run-pause-btn').classList.add('hidden');
+  document.getElementById('run-stop-btn').classList.add('hidden');
+  document.getElementById('run-sheet-overlay').classList.remove('hidden');
+  document.getElementById('run-sheet-overlay').dataset.strategyId = strategy.id;
+  window._pendingStrategy = strategy;
+}
+
+document.getElementById('run-sheet-close').addEventListener('click', () => {
+  document.getElementById('run-sheet-overlay').classList.add('hidden');
+});
+
+document.getElementById('run-start-btn').addEventListener('click', async () => {
+  if (!SidoAuth.isLoggedIn()) {
+    toast('Log in with Deriv first — bots need an authenticated session to trade.');
+    return;
+  }
+  const strategy = window._pendingStrategy;
+  if (!strategy) return;
+
+  activeRun = new SidoBots.BotRun({
+    strategy,
+    symbol: strategy.defaultSymbol || document.getElementById('chart-symbol').value,
+    stake: document.getElementById('run-stake').value,
+    duration: document.getElementById('run-duration').value,
+    durationUnit: 't',
+    takeProfit: document.getElementById('run-tp').value,
+    stopLoss: document.getElementById('run-sl').value,
+    maxTrades: document.getElementById('run-max').value,
+    martingaleMultiplier: document.getElementById('run-martingale').value,
+    currency: accountInfo?.currency || 'USD'
+  });
+
+  activeRun.onUpdate(renderRunSheet);
+  await activeRun.start();
+  renderRunSheet(activeRun);
+
+  document.getElementById('run-start-btn').classList.add('hidden');
+  document.getElementById('run-pause-btn').classList.remove('hidden');
+  document.getElementById('run-stop-btn').classList.remove('hidden');
+});
+
+document.getElementById('run-pause-btn').addEventListener('click', () => {
+  if (!activeRun) return;
+  if (activeRun.status === 'running') {
+    activeRun.pause();
+    document.getElementById('run-pause-btn').textContent = '▶ Resume';
+  } else {
+    activeRun.resume();
+    document.getElementById('run-pause-btn').textContent = '⏸ Pause';
+  }
+});
+
+document.getElementById('run-stop-btn').addEventListener('click', () => {
+  if (!activeRun) return;
+  activeRun.stop();
+  document.getElementById('run-pause-btn').classList.add('hidden');
+  document.getElementById('run-stop-btn').classList.add('hidden');
+  document.getElementById('run-start-btn').classList.remove('hidden');
+  document.getElementById('run-start-btn').textContent = '▶ Start bot';
+});
+
+function renderRunSheet(run) {
+  document.getElementById('run-stat-trades').textContent = run.stats.trades;
+  document.getElementById('run-stat-wins').textContent = run.stats.wins;
+  document.getElementById('run-stat-pl').textContent = run.stats.pnl.toFixed(2);
+  document.getElementById('run-log').innerHTML = run.log
+    .map((l) => `<p>${new Date(l.t).toLocaleTimeString()} — ${l.text}</p>`)
+    .join('');
+  document.getElementById('stat-session-pl').textContent = run.stats.pnl.toFixed(2);
+}
+
+/* ----------------------------- Pulse strip ----------------------------- */
+/* Decorative signature element: a softly animated, colour-cycling
+   waveform under the status bar — a small reminder that markets are
+   always moving, even before you've connected an account. */
+
+function startPulseStrip() {
+  const canvas = document.getElementById('pulse-canvas');
+  const ctx = canvas.getContext('2d');
+  let t = 0;
+  const colors = ['#8b5cf6', '#22d3ee', '#fbbf24', '#fb7185'];
+
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function frame() {
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    const segments = 3;
+    for (let s = 0; s < segments; s++) {
+      ctx.beginPath();
+      for (let x = 0; x <= w; x += 4) {
+        const y =
+          h / 2 +
+          Math.sin(x * 0.02 + t + s * 1.4) * (h * 0.28) * Math.sin(t * 0.3 + s);
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = colors[s % colors.length];
+      ctx.globalAlpha = 0.55 - s * 0.12;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    t += 0.025;
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+/* -------------------------------- Init -------------------------------- */
+
+document.getElementById('disclaimer-close').addEventListener('click', () => {
+  document.getElementById('disclaimer').classList.add('dismissed');
+});
+
+function init() {
+  fillSymbolSelects();
+  renderAuthState();
+  updateAccountChip();
+  renderBuiltinBots();
+  renderMyBots();
+  SidoChart.init(document.getElementById('tick-chart'));
+  startPulseStrip();
+  bootConnection();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+
+</script>
+</body>
+</html>
